@@ -130,6 +130,8 @@ The available subcommands are:
 		7 or f: Find this file
 		8 or i: Find files #including this file
 		9 or a: Find places where this symbol is assigned a value
+		(uppercase letters): Same as lowercase with switched case
+                                     sensitivity
 
 	For all types, except 4 and 6, leading white space for {name} is
 	removed.  For 4 and 6 there is exactly one space between {querytype}

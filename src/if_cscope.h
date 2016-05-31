@@ -56,6 +56,7 @@ typedef struct csi {
 
     FILE *	    fr_fp;	/* from cscope: FILE. */
     FILE *	    to_fp;	/* to cscope: FILE. */
+    int             switched_case;  /* switched case sensitivity */
 } csinfo_T;
 
 typedef enum { Add, Find, Help, Kill, Reset, Show } csid_e;
