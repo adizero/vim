@@ -8269,6 +8269,12 @@ ex_smile(exarg_T *eap UNUSED)
     msg_clr_eos();
 }
 
+    void
+ex_xrestore(exarg_T *eap UNUSED)
+{
+   xterm_dpy_was_reset = TRUE;
+}
+
 #if defined(FEAT_GUI) || defined(FEAT_CLIENTSERVER) || defined(PROTO)
 /*
  * ":drop"
