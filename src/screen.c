@@ -7880,9 +7880,23 @@ screen_start_highlight(int attr)
 		out_str(T_ME);
 	    if ((attr & HL_STANDOUT) && T_SO != NULL)	/* standout */
 		out_str(T_SO);
-	    if ((attr & (HL_UNDERLINE | HL_UNDERCURL)) && T_US != NULL)
-						   /* underline or undercurl */
+	    if ((attr & HL_UNDERLINE) && T_US != NULL)
+						   /* underline */
 		out_str(T_US);
+	    if ((attr & HL_UNDERCURL) && (T_UCS != NULL || T_US != NULL))
+	    {
+		/* undercurl (fallback to underline if not defined) */
+		if (T_UCS != NULL)
+		    out_str(T_UCS);
+		else
+		{
+		    if (!(attr & HL_UNDERLINE))
+		    {
+			out_str(T_US);
+		    }
+		}
+	    }
+
 	    if ((attr & HL_ITALIC) && T_CZH != NULL)	/* italic */
 		out_str(T_CZH);
 	    if ((attr & HL_INVERSE) && T_MR != NULL)	/* inverse (reverse) */
@@ -7997,12 +8011,33 @@ screen_stop_highlight(void)
 		else
 		    out_str(T_SE);
 	    }
-	    if (screen_attr & (HL_UNDERLINE | HL_UNDERCURL))
+	    if (screen_attr & HL_UNDERLINE)
 	    {
 		if (STRCMP(T_UE, T_ME) == 0)
 		    do_ME = TRUE;
 		else
 		    out_str(T_UE);
+	    }
+	    if (screen_attr & HL_UNDERCURL)
+	    {
+		/* undercurl (fallback to underline if not defined) */
+		if (STRCMP(T_UCE, T_ME) == 0)
+		    do_ME = TRUE;
+		else
+		{
+		    if (T_UCE != NULL)
+			out_str(T_UCE);
+		    else
+		    {
+			if ((T_UCS == NULL) && (T_US != NULL))
+			{
+			    if (STRCMP(T_UE, T_ME) == 0)
+				do_ME = TRUE;
+			    else
+				out_str(T_UE);
+			}
+		    }
+		}
 	    }
 	    if (screen_attr & HL_ITALIC)
 	    {
