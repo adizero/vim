@@ -13,6 +13,8 @@ void set_completion(colnr_T startcol, list_T *list);
 void ins_compl_show_pum(void);
 char_u *find_word_start(char_u *ptr);
 char_u *find_word_end(char_u *ptr);
+char_u *find_word_start_th(char_u *ptr);
+char_u *find_word_end_th(char_u *ptr);
 int ins_compl_active(void);
 int ins_compl_add_tv(typval_T *tv, int dir);
 void ins_compl_check_keys(int frequency);
