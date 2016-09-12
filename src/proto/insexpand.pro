@@ -28,6 +28,8 @@ int pum_wanted(void);
 void ins_compl_show_pum(void);
 char_u *find_word_start(char_u *ptr);
 char_u *find_word_end(char_u *ptr);
+char_u *find_word_start_th(char_u *ptr);
+char_u *find_word_end_th(char_u *ptr);
 void ins_compl_clear(void);
 int ins_compl_active(void);
 int ins_compl_used_match(void);

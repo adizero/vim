@@ -1314,10 +1314,31 @@ ins_compl_files(
 		while (vim_regexec(regmatch, buf, (colnr_T)(ptr - buf)))
 		{
 		    ptr = regmatch->startp[0];
+
+		    /* accept only lines, where search word is at the beginning 
+		     * when running in thesaurus mode, othewise too many matches
+		     * are returned (because it returns all synonyms from lines,
+		     * where match string is in the right side)
+		     */
+		    if (thesaurus && ptr != buf)
+		    {
+			ptr = find_line_end(ptr);
+			break;
+		    }
+
 		    if (ctrl_x_mode_line_or_eval())
 			ptr = find_line_end(ptr);
 		    else
-			ptr = find_word_end(ptr);
+		    {
+			if (thesaurus)
+			{
+			    ptr = find_word_end_th(ptr);
+			}
+			else
+			{
+			    ptr = find_word_end(ptr);
+			}
+		    }
 		    add_r = ins_compl_add_infercase(regmatch->startp[0],
 					  (int)(ptr - regmatch->startp[0]),
 						  p_ic, files[i], *dir, FALSE);
@@ -1327,13 +1348,15 @@ ins_compl_files(
 
 			// Add the other matches on the line
 			ptr = buf;
+			MSG(buf);
 			while (!got_int)
 			{
 			    // Find start of the next word.  Skip white
 			    // space and punctuation.
-			    ptr = find_word_start(ptr);
+			    ptr = find_word_start_th(ptr);
 			    if (*ptr == NUL || *ptr == NL)
 				break;
+			    MSG(ptr);
 			    wstart = ptr;
 
 			    // Find end of the word.
@@ -1345,12 +1368,13 @@ ins_compl_files(
 				{
 				    int l = (*mb_ptr2len)(ptr);
 
-				    if (l < 2 && !vim_iswordc(*ptr))
+				    if (l < 2 && !vim_iswordc(*ptr) && 
+					    *ptr != '-' && *ptr != ' ')
 					break;
 				    ptr += l;
 				}
 			    else
-				ptr = find_word_end(ptr);
+				ptr = find_word_end_th(ptr);
 
 			    // Add the word. Skip the regexp match.
 			    if (wstart != regmatch->startp[0])
@@ -1393,6 +1417,20 @@ find_word_start(char_u *ptr)
     return ptr;
 }
 
+    char_u *
+find_word_start_th(char_u *ptr)
+{
+    if (has_mbyte)
+	while (*ptr != NUL && *ptr != '\n' && mb_get_class(ptr) <= 1 && 
+		*ptr != '-' && *ptr != ' ')
+	    ptr += (*mb_ptr2len)(ptr);
+    else
+	while (*ptr != NUL && *ptr != '\n' && !vim_iswordc(*ptr) && 
+		*ptr != '-' && *ptr != ' ')
+	    ++ptr;
+    return ptr;
+}
+
 /*
  * Find the end of the word.  Assumes it starts inside a word.
  * Returns a pointer to just after the word.
@@ -1415,6 +1453,28 @@ find_word_end(char_u *ptr)
     }
     else
 	while (vim_iswordc(*ptr))
+	    ++ptr;
+    return ptr;
+}
+
+    char_u *
+find_word_end_th(char_u *ptr)
+{
+    int		start_class;
+
+    if (has_mbyte)
+    {
+	start_class = mb_get_class(ptr);
+	if (start_class > 1)
+	    while (*ptr != NUL)
+	    {
+		ptr += (*mb_ptr2len)(ptr);
+		if (mb_get_class(ptr) != start_class)
+		    break;
+	    }
+    }
+    else
+	while (vim_iswordc(*ptr) || *ptr == '-' || *ptr == ' ')
 	    ++ptr;
     return ptr;
 }
