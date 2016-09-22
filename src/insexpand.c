@@ -1339,16 +1339,35 @@ ins_compl_files(
 			    ptr = find_word_end(ptr);
 			}
 		    }
+
+		    char_u *fname = files[i];
+		    if (thesaurus)
+		    {
+			if (regmatch->endp[0] - regmatch->startp[0] == 
+				ptr - regmatch->startp[0])
+			{
+			    fname = "";
+			}
+			else
+			{
+			    fname = "[completion]";
+			}
+		    }
+
 		    add_r = ins_compl_add_infercase(regmatch->startp[0],
 					  (int)(ptr - regmatch->startp[0]),
-						  p_ic, files[i], *dir, FALSE);
-		    if (thesaurus)
+						  p_ic, fname, *dir, FALSE);
+		    /* accept only first words, when doing thesaurus search for word prefix 
+		     * (e.g. plan| -> plant, Planck, ...), otherwise just show synonyms*/
+		    if (thesaurus && 
+			    (regmatch->endp[0] - regmatch->startp[0] == 
+				ptr - regmatch->startp[0]))
 		    {
 			char_u *wstart;
 
 			// Add the other matches on the line
 			ptr = buf;
-			MSG(buf);
+			/* MSG(buf); */
 			while (!got_int)
 			{
 			    // Find start of the next word.  Skip white
@@ -1356,31 +1375,17 @@ ins_compl_files(
 			    ptr = find_word_start_th(ptr);
 			    if (*ptr == NUL || *ptr == NL)
 				break;
-			    MSG(ptr);
+			    /* MSG(ptr); */
 			    wstart = ptr;
 
 			    // Find end of the word.
-			    if (has_mbyte)
-				// Japanese words may have characters in
-				// different classes, only separate words
-				// with single-byte non-word characters.
-				while (*ptr != NUL)
-				{
-				    int l = (*mb_ptr2len)(ptr);
-
-				    if (l < 2 && !vim_iswordc(*ptr) && 
-					    *ptr != '-' && *ptr != ' ')
-					break;
-				    ptr += l;
-				}
-			    else
-				ptr = find_word_end_th(ptr);
+			    ptr = find_word_end_th(ptr);
 
 			    // Add the word. Skip the regexp match.
 			    if (wstart != regmatch->startp[0])
 				add_r = ins_compl_add_infercase(wstart,
 					(int)(ptr - wstart),
-					p_ic, files[i], *dir, FALSE);
+					p_ic, "[synonym]", *dir, FALSE);
 			}
 		    }
 		    if (add_r == OK)
@@ -1460,18 +1465,20 @@ find_word_end(char_u *ptr)
     char_u *
 find_word_end_th(char_u *ptr)
 {
-    int		start_class;
-
     if (has_mbyte)
     {
-	start_class = mb_get_class(ptr);
-	if (start_class > 1)
-	    while (*ptr != NUL)
-	    {
-		ptr += (*mb_ptr2len)(ptr);
-		if (mb_get_class(ptr) != start_class)
-		    break;
-	    }
+	/* Japanese words may have characters in
+	 * different classes, only separate words
+	 * with single-byte non-word characters. */
+	while (*ptr != NUL)
+	{
+	    int l = (*mb_ptr2len)(ptr);
+
+	    if (l < 2 && !vim_iswordc(*ptr) && 
+		    *ptr != '-' && *ptr != ' ')
+		break;
+	    ptr += l;
+	}
     }
     else
 	while (vim_iswordc(*ptr) || *ptr == '-' || *ptr == ' ')
@@ -3485,7 +3492,9 @@ ins_compl_next(
 	    }
 	    vim_snprintf((char *)IObuff, IOSIZE, "%s %s%s", lead,
 				s > compl_shown_match->cp_fname ? "<" : "", s);
+	    /* Do not show match in file <filename> in messages
 	    msg((char *)IObuff);
+	    */
 	    redraw_cmdline = FALSE;	    // don't overwrite!
 	}
     }
