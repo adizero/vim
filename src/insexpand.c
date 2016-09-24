@@ -1427,11 +1427,11 @@ find_word_start_th(char_u *ptr)
 {
     if (has_mbyte)
 	while (*ptr != NUL && *ptr != '\n' && mb_get_class(ptr) <= 1 && 
-		*ptr != '-' && *ptr != ' ')
+	    *ptr != '-' && *ptr != ' ' && *ptr != '\'' && *ptr != '.')
 	    ptr += (*mb_ptr2len)(ptr);
     else
 	while (*ptr != NUL && *ptr != '\n' && !vim_iswordc(*ptr) && 
-		*ptr != '-' && *ptr != ' ')
+	    *ptr != '-' && *ptr != ' ' && *ptr != '\'' && *ptr != '.')
 	    ++ptr;
     return ptr;
 }
@@ -1475,14 +1475,21 @@ find_word_end_th(char_u *ptr)
 	    int l = (*mb_ptr2len)(ptr);
 
 	    if (l < 2 && !vim_iswordc(*ptr) && 
-		    *ptr != '-' && *ptr != ' ')
+		    *ptr != '-' && *ptr != ' ' && *ptr != '\'' && *ptr != '.')
 		break;
 	    ptr += l;
 	}
     }
     else
-	while (vim_iswordc(*ptr) || *ptr == '-' || *ptr == ' ')
+    {
+	while (*ptr != NUL)
+	{
+	    if (!vim_iswordc(*ptr) && 
+		    *ptr != '-' && *ptr != ' ' && *ptr != '\'' && *ptr != '.')
+		break;
 	    ++ptr;
+	}
+    }
     return ptr;
 }
 
