@@ -1125,7 +1125,7 @@ static struct vimoption options[] =
     {"foldnestmax", "fdn",  P_NUM|P_VI_DEF|P_RWIN,
 #ifdef FEAT_FOLDING
 			    (char_u *)VAR_WIN, PV_FDN, did_set_foldnestmax, NULL,
-			    {(char_u *)20L, (char_u *)0L}
+			    {(char_u *)98L, (char_u *)0L}
 #else
 			    (char_u *)NULL, PV_NONE, NULL, NULL,
 			    {(char_u *)NULL, (char_u *)0L}
