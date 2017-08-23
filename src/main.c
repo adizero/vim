@@ -2756,6 +2756,7 @@ create_windows(mparm_T *parmp UNUSED)
     else
 	parmp->window_count = 1;
 
+    TIME_MSG("point1");
     if (recoverymode)			// do recover
     {
 	msg_scroll = TRUE;		// scroll message up
@@ -2777,8 +2778,10 @@ create_windows(mparm_T *parmp UNUSED)
 	++autocmd_no_enter;
 	++autocmd_no_leave;
 	dorewind = TRUE;
+	TIME_MSG("point2");
 	while (done++ < 1000)
 	{
+	    TIME_MSG("point loop");
 	    if (dorewind)
 	    {
 		if (parmp->window_layout == WIN_TABS)
@@ -2841,6 +2844,7 @@ create_windows(mparm_T *parmp UNUSED)
 		break;
 	    }
 	}
+	TIME_MSG("point3");
 	if (parmp->window_layout == WIN_TABS)
 	    goto_tabpage(1);
 	else
