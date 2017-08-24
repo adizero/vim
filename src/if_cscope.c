@@ -630,12 +630,7 @@ staterr:
 
     if (i != -1)
     {
-	if (cs_create_connection(i) == CSCOPE_FAILURE)
-	{
-	    cs_release_csp(i, TRUE);
-	    goto add_err;
-	}
-
+	csinfo[i].create_failed = 0;
 	if (p_csverbose)
 	{
 	    msg_clr_eos();
@@ -1157,6 +1152,24 @@ cs_find_common(
 	cmdletter = opt[0];
     }
 
+    for (i = 0; i < csinfo_size; i++)
+    {
+	if (csinfo[i].fname == NULL)
+	    continue;
+
+	if (csinfo[i].initialized == 0 && csinfo[i].create_failed != 1)
+	{
+	    if (cs_create_connection(i) == CSCOPE_FAILURE || cs_read_prompt(i) == CSCOPE_FAILURE)
+	    {
+		cs_release_csp(i, TRUE);
+		csinfo[i].create_failed = 1;
+		continue;
+	    }
+
+	    csinfo[i].initialized = 1;
+	}
+    }
+
     qfpos = (char *)vim_strchr(p_csqf, cmdletter);
     if (qfpos != NULL)
     {
@@ -1198,19 +1211,6 @@ cs_find_common(
     for (i = 0; i < csinfo_size; i++)
     {
 	nummatches[i] = 0;
-
-	if (csinfo[i].fname == NULL || csinfo[i].to_fp == NULL)
-	    continue;
-
-	if (csinfo[i].initialized == 0)
-	{
-	    if (cs_read_prompt(i) == CSCOPE_FAILURE)
-	    {
-		cs_release_csp(i, TRUE);
-		continue;
-	    }
-    	    csinfo[i].initialized = 1;
-	}
     }
 
     totmatches = 0;
@@ -1396,6 +1396,7 @@ clear_csinfo(int i)
     csinfo[i].to_fp  = NULL;
     csinfo[i].switched_case = 0;
     csinfo[i].initialized = 0;
+    csinfo[i].create_failed = 0;
 #if defined(MSWIN)
     csinfo[i].hProc = NULL;
 #endif
