@@ -123,6 +123,7 @@ src/README.txt
 
 # other files possibly created by tools
 src/cscope.out
+src/cscope.out*
 
 # Linter/language server files
 /.cache/clangd/
