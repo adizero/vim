@@ -581,6 +581,10 @@ a[			"a [] block", select [count] '[' ']' blocks.  This
 			goes backwards to the [count] unclosed '[', and finds
 			the matching ']'.  The enclosed text is selected,
 			including the '[' and ']'.
+			If it fails to find the block under or around the
+			cursor, and '[' was specified, it will search the
+			buffer backwards for the block or, if ']' was
+			specified, it will search the buffer forwards.
 			When used in Visual mode it is made characterwise.
 
 i]						*v_i]* *v_i[* *i]* *i[*
@@ -588,6 +592,10 @@ i[			"inner [] block", select [count] '[' ']' blocks.  This
 			goes backwards to the [count] unclosed '[', and finds
 			the matching ']'.  The enclosed text is selected,
 			excluding the '[' and ']'.
+			If it fails to find the block under or around the
+			cursor, and '[' was specified, it will search the
+			buffer backwards for the block or, if ']' was
+			specified, it will search the buffer forwards.
 			When used in Visual mode it is made characterwise.
 
 a)							*v_a)* *a)* *a(*
@@ -596,6 +604,10 @@ ab			"a block", select [count] blocks, from "[count] [(" to
 			the matching ')', including the '(' and ')' (see
 			|[(|).  Does not include white space outside of the
 			parenthesis.
+			If it fails to find the block under or around the
+			cursor, and '(' was specified, it will search the
+			buffer backwards for the block or, if ')' was
+			specified, it will search the buffer forwards.
 			When used in Visual mode it is made characterwise.
 
 i)							*v_i)* *i)* *i(*
@@ -603,18 +615,30 @@ i(							*vib* *v_ib* *v_i(* *ib*
 ib			"inner block", select [count] blocks, from "[count] [("
 			to the matching ')', excluding the '(' and ')' (see
 			|[(|).
+			If it fails to find the block under or around the
+			cursor, and '(' was specified, it will search the
+			buffer backwards for the block or, if ')' was
+			specified, it will search the buffer forwards.
 			When used in Visual mode it is made characterwise.
 
 a>						*v_a>* *v_a<* *a>* *a<*
 a<			"a <> block", select [count] <> blocks, from the
 			[count]'th unmatched '<' backwards to the matching
 			'>', including the '<' and '>'.
+			If it fails to find the block under or around the
+			cursor, and '<' was specified, it will search the
+			buffer backwards for the block or, if '>' was
+			specified, it will search the buffer forwards.
 			When used in Visual mode it is made characterwise.
 
 i>						*v_i>* *v_i<* *i>* *i<*
 i<			"inner <> block", select [count] <> blocks, from
 			the [count]'th unmatched '<' backwards to the matching
 			'>', excluding the '<' and '>'.
+			If it fails to find the block under or around the
+			cursor, and '<' was specified, it will search the
+			buffer backwards for the block or, if '>' was
+			specified, it will search the buffer forwards.
 			When used in Visual mode it is made characterwise.
 
 						*v_at* *at*
@@ -636,6 +660,10 @@ a{							*v_aB* *v_a{* *aB*
 aB			"a Block", select [count] Blocks, from "[count] [{" to
 			the matching '}', including the '{' and '}' (see
 			|[{|).
+			If it fails to find the block under or around the
+			cursor, and '{' was specified, it will search the
+			buffer backwards for the block or, if '}' was
+			specified, it will search the buffer forwards.
 			When used in Visual mode it is made characterwise.
 
 i}							*v_i}* *i}* *i{*
@@ -643,6 +671,10 @@ i{							*v_iB* *v_i{* *iB*
 iB			"inner Block", select [count] Blocks, from "[count] [{"
 			to the matching '}', excluding the '{' and '}' (see
 			|[{|).
+			If it fails to find the block under or around the
+			cursor, and '{' was specified, it will search the
+			buffer backwards for the block or, if '}' was
+			specified, it will search the buffer forwards.
 			When used in Visual mode it is made characterwise.
 
 a"							*v_aquote* *aquote*

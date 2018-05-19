@@ -1,0 +1,46 @@
+Test for block text object search
+
+Specifically, tests:
+- Being within the object (so no need for a search)
+- Being left of the object
+- Being right of the object
+- for every type of block supported
+
+STARTTEST
+:so small.vim
+:enew
+:"
+:" Create six lines with an object on each for every block type
+:" - three for left, inside and right
+:" - pairs to use i and a
+:"
+:for blockpair in ["()", "{}", "[]", "<>"]
+:for i in range(0,2) " left, inside, right
+:for j in range(0,1) " i, a
+:execute "normal olll" . blockpair[0] . "mmm" . blockpair[1] . "rrr"
+:endfor
+:endfor
+:endfor
+:"
+:" Apply the ci<object> and ca<object>, searching left, being in and searching right
+:"
+:1
+:for blockpair in ["()", "{}", "[]", "<>"]
+:	+
+:	execute "normal 0ci" . blockpair[1] . "OK\<esc>"
+:	+
+:	execute "normal $ci" . blockpair[0] . "OK\<esc>"
+:	+
+:	execute "normal 6|ci" . blockpair[0] . "OK\<esc>"
+:	+
+:	execute "normal 0ca" . blockpair[1] . "OK\<esc>"
+:	+
+:	execute "normal $ca" . blockpair[0] . "OK\<esc>"
+:	+
+:	execute "normal 6|ca" . blockpair[0] . "OK\<esc>"
+:endfor
+:
+:w! test.out
+:qa!
+ENDTEST
+
