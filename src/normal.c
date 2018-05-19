@@ -7175,6 +7175,26 @@ nv_object(
     mps_save = curbuf->b_p_mps;
     curbuf->b_p_mps = (char_u *)"(:),{:},[:],<:>";
 
+    // Set search direction
+    int dir;
+    switch (cap->nchar)
+    {
+	case '(':
+	case '{':
+	case '[':
+	case '<':
+	    dir = BACKWARD;
+	    break;
+	case ')':
+	case '}':
+	case ']':
+	case '>':
+	    dir = FORWARD;
+	    break;
+	default:
+	    dir = 0;
+    }
+
     switch (cap->nchar)
     {
 	case 'w': // "aw" = a word
@@ -7183,23 +7203,50 @@ nv_object(
 	case 'W': // "aW" = a WORD
 		flag = current_word(cap->oap, cap->count1, include, TRUE);
 		break;
+	case 'a':
+		{
+		    static pos_T pos;
+		    char_u	*linep;			// pointer to current line
+		    pos = curwin->w_cursor;
+#ifdef FEAT_VIRTUALEDIT
+		    pos.coladd = 0;
+#endif
+		    linep = ml_get(pos.lnum);
+
+		    int match = (vim_strchr(linep, ',') != NULL);
+
+		    flag = current_block(cap->oap, cap->count1, include, ',', ',', dir);
+		    if (flag == FAIL)
+		    {
+			flag = current_block(cap->oap, cap->count1, include, '(', ',', dir);
+			if (flag == FAIL)
+			{
+			    flag = current_block(cap->oap, cap->count1, include, ',', ')', dir);
+			    if (flag == FAIL)
+			    {
+				flag = current_block(cap->oap, cap->count1, include, '(', ')', dir);
+			    }
+			}
+		    }
+		}
+		break;
 	case 'b': // "ab" = a braces block
 	case '(':
 	case ')':
-		flag = current_block(cap->oap, cap->count1, include, '(', ')');
+		flag = current_block(cap->oap, cap->count1, include, '(', ')', dir);
 		break;
 	case 'B': // "aB" = a Brackets block
 	case '{':
 	case '}':
-		flag = current_block(cap->oap, cap->count1, include, '{', '}');
+		flag = current_block(cap->oap, cap->count1, include, '{', '}', dir);
 		break;
 	case '[': // "a[" = a [] block
 	case ']':
-		flag = current_block(cap->oap, cap->count1, include, '[', ']');
+		flag = current_block(cap->oap, cap->count1, include, '[', ']', dir);
 		break;
 	case '<': // "a<" = a <> block
 	case '>':
-		flag = current_block(cap->oap, cap->count1, include, '<', '>');
+		flag = current_block(cap->oap, cap->count1, include, '<', '>', dir);
 		break;
 #ifdef FEAT_EVAL
 	case 't': // "at" = a tag block (xml and html)

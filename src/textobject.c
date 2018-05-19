@@ -1042,7 +1042,8 @@ current_block(
     long	count,
     int		include,	// TRUE == include white space
     int		what,		// '(', '{', etc.
-    int		other)		// ')', '}', etc.
+    int		other,		// ')', '}', etc.
+    int		dir)		// direction to search if not in object
 {
     pos_T	old_pos;
     pos_T	*pos = NULL;
@@ -1114,8 +1115,68 @@ current_block(
      */
     if (pos == NULL || (end_pos = findmatch(NULL, other)) == NULL)
     {
+	/*
+	 * Cursor is not in or on the desired object; however, the object may
+	 * still be in the buffer.  Search for it in the specified direction.
+	 */
+
+	/*
+	 * Ensure a direction is set; abort otherwise.
+	 */
+	if (dir != FORWARD && dir != BACKWARD)
+    {
 	curwin->w_cursor = old_pos;
 	return FAIL;
+    }
+
+	/*
+	 * Search in specified direction for appropriate character 
+	 */
+	while (1)
+	{
+	    if (((dir == FORWARD) ? inc_cursor() : dec_cursor()) == -1)
+	    {
+		/*
+		 * Ran into end of the buffer without finding desired bound;
+		 * abort.
+		 */
+		curwin->w_cursor = old_pos;
+		return FAIL;
+	    }
+	    if (((dir == FORWARD) ? what : other) == gchar_cursor())
+	    {
+		/*
+		 * Found desired character, stop searching
+		 */
+		break;
+	    }
+	}
+
+	/*
+	 * Find matching bound.
+	 */
+	if ((pos = findmatch(NULL, ((dir == FORWARD) ? other : what))) == NULL)
+	{
+	    /*
+	     * Failed to find matching bound, abort.
+	     */
+	    curwin->w_cursor = old_pos;
+	    return FAIL;
+	}
+
+	/*
+	 * Found both bounds, so set them accordingly.
+	 */
+	if (dir == FORWARD)
+	{
+	    start_pos = curwin->w_cursor;
+	    end_pos = pos;
+	}
+	else
+	{
+	    start_pos = *pos;
+	    end_pos = &curwin->w_cursor;
+	}
     }
     curwin->w_cursor = *end_pos;
 
