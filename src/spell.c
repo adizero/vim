@@ -4328,7 +4328,7 @@ expand_spelling(
     int
 valid_spelllang(char_u *val)
 {
-    return valid_name(val, ".-_,@");
+    return valid_name(val, ".-_,@/");
 }
 
 /*
